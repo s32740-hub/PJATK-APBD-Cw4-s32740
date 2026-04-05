@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LegacyRenewalApp;
 
@@ -51,7 +52,73 @@ public class DiscountValidator : IDiscountValidator
     }
 }
 
-public class FeeCalculator
+public class SupportFeeProvider:ISupportFeeProvider
 {
-    
+    public ISupportFee _supportFee;
+    public SupportFeeProvider(ISupportFee supportFee)
+    {
+        _supportFee = supportFee;
+    }
+    public (decimal, string) CalculateFee(bool includePremiumSupport, string normalizedPlanCode)
+    {
+        if (includePremiumSupport && _supportFee.IsMatch(normalizedPlanCode))
+        {
+            return (_supportFee.Calculate(), "premium support included;");
+        }
+
+        return (0m, null);
+    }
+}
+
+
+public class PaymentFeeProvider:IPaymentFeeProvider
+{
+    public IPaymentFee _paymentFee;
+    public PaymentFeeProvider(IPaymentFee paymentFee)
+    {
+        _paymentFee = paymentFee;
+    }
+    public (decimal, string?) CalculateFee(string normalizedPaymentMethod, decimal subtotalAfterDiscount, decimal supportFee)
+    {
+        if (_paymentFee.IsMatch(normalizedPaymentMethod))
+        {
+            return _paymentFee.Calculate(subtotalAfterDiscount, supportFee);
+        }
+        throw new ArgumentException("Unsupported payment method");
+    }
+}
+
+public class TaxProvider : ITaxProvider
+{
+    public ITaxCalculator _taxCalculator;
+    public TaxProvider(ITaxCalculator taxCalculator)
+    {
+        _taxCalculator = taxCalculator;
+    }
+    public decimal CalculateFee(string country)
+    {
+        if (_taxCalculator.IsMatch(country))
+        {
+            return _taxCalculator.Calculate();
+        }
+        return 0.20m;
+    }
+}
+
+public class FinalSumCalculator:IFinalSumCalculator
+{
+    public (decimal, string?) Calculate(decimal subtotalAfterDiscount, decimal supportFee, decimal paymentFee, decimal taxRate)
+    {
+        decimal taxBase = subtotalAfterDiscount + supportFee + paymentFee;
+        decimal taxAmount = taxBase * taxRate;
+        decimal finalAmount = taxBase + taxAmount;
+
+        if (finalAmount < 500m)
+        {
+            finalAmount = 500m;
+            string note = "minimum invoice amount applied; ";
+            return (finalAmount, note);
+        }
+        return (finalAmount, null);
+    }
 }
