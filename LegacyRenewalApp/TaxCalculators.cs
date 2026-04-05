@@ -35,3 +35,7 @@ public class TaxCalculatorNorway : ITaxCalculator
         return 0.25m;
     }
 }
+public class TaxCalculatorDefault : ITaxCalculator {
+    public bool IsMatch(string country) => true; // catch-all
+    public decimal Calculate() => 0.20m;
+}

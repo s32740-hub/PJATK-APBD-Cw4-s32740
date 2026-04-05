@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LegacyRenewalApp;
 
@@ -10,9 +11,9 @@ public class BaseCalculation : IBaseCalculation
         return (monthlyPricePerSeat * seatCount * 12m) + setupFee;
     }
 }
-public class DiscountProvider
+public class DiscountProvider : IDiscountProvider
 {
-    public IEnumerable<IDiscountStrategy> _strategy;
+    private readonly IEnumerable<IDiscountStrategy> _strategy;
     public DiscountProvider(IEnumerable<IDiscountStrategy> strategies)
     {
         _strategy = strategies;
@@ -54,16 +55,17 @@ public class DiscountValidator : IDiscountValidator
 
 public class SupportFeeProvider:ISupportFeeProvider
 {
-    public ISupportFee _supportFee;
-    public SupportFeeProvider(ISupportFee supportFee)
+    private readonly IEnumerable<ISupportFee> _supportFee;
+    public SupportFeeProvider(IEnumerable<ISupportFee> supportFee)
     {
         _supportFee = supportFee;
     }
     public (decimal, string) CalculateFee(bool includePremiumSupport, string normalizedPlanCode)
     {
-        if (includePremiumSupport && _supportFee.IsMatch(normalizedPlanCode))
+        if (includePremiumSupport)
         {
-            return (_supportFee.Calculate(), "premium support included;");
+            var match = _supportFee.FirstOrDefault(c => c.IsMatch(normalizedPlanCode));
+            return (match.Calculate(), "premium support included;");
         }
 
         return (0m, null);
@@ -73,52 +75,48 @@ public class SupportFeeProvider:ISupportFeeProvider
 
 public class PaymentFeeProvider:IPaymentFeeProvider
 {
-    public IPaymentFee _paymentFee;
-    public PaymentFeeProvider(IPaymentFee paymentFee)
+    private readonly IEnumerable<IPaymentFee> _paymentFees;
+    public PaymentFeeProvider(IEnumerable<IPaymentFee> paymentFees)
     {
-        _paymentFee = paymentFee;
+        _paymentFees = paymentFees;
     }
     public (decimal, string?) CalculateFee(string normalizedPaymentMethod, decimal subtotalAfterDiscount, decimal supportFee)
     {
-        if (_paymentFee.IsMatch(normalizedPaymentMethod))
-        {
-            return _paymentFee.Calculate(subtotalAfterDiscount, supportFee);
-        }
-        throw new ArgumentException("Unsupported payment method");
+        var match = _paymentFees.FirstOrDefault(c => c.IsMatch(normalizedPaymentMethod));
+        return match?.Calculate(subtotalAfterDiscount, supportFee) ?? throw new ArgumentException("Unsupported payment method");
     }
 }
-
 public class TaxProvider : ITaxProvider
 {
-    public ITaxCalculator _taxCalculator;
-    public TaxProvider(ITaxCalculator taxCalculator)
+    private readonly IEnumerable<ITaxCalculator> _calculators;
+
+    public TaxProvider(IEnumerable<ITaxCalculator> calculators)
     {
-        _taxCalculator = taxCalculator;
+        _calculators = calculators;
     }
+
     public decimal CalculateFee(string country)
     {
-        if (_taxCalculator.IsMatch(country))
-        {
-            return _taxCalculator.Calculate();
-        }
-        return 0.20m;
+        var match = _calculators.FirstOrDefault(c => c.IsMatch(country));
+        return match?.Calculate() ?? 0.20m;
     }
 }
 
 public class FinalSumCalculator:IFinalSumCalculator
 {
-    public (decimal, string?) Calculate(decimal subtotalAfterDiscount, decimal supportFee, decimal paymentFee, decimal taxRate)
+    public (decimal, decimal, string?) Calculate(decimal subtotalAfterDiscount, decimal supportFee, decimal paymentFee, decimal taxRate)
     {
         decimal taxBase = subtotalAfterDiscount + supportFee + paymentFee;
         decimal taxAmount = taxBase * taxRate;
         decimal finalAmount = taxBase + taxAmount;
+        decimal totalTax = (subtotalAfterDiscount + supportFee + paymentFee) * taxRate;
 
         if (finalAmount < 500m)
         {
             finalAmount = 500m;
             string note = "minimum invoice amount applied; ";
-            return (finalAmount, note);
+            return (finalAmount, totalTax, note);
         }
-        return (finalAmount, null);
+        return (finalAmount, totalTax, null);
     }
 }

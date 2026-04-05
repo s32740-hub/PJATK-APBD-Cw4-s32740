@@ -48,6 +48,11 @@ public interface ITaxProvider
 }
 public interface IFinalSumCalculator
 {
-    public (decimal, string?) Calculate(decimal subtotalAfterDiscount, decimal supportFee, decimal paymentFee,
+    public (decimal, decimal, string?) Calculate(decimal subtotalAfterDiscount, decimal supportFee, decimal paymentFee,
         decimal taxRate);
+}
+
+public interface IDiscountProvider
+{
+    (decimal total, string notes) CalculateAllDiscounts(decimal baseAmount, DiscountContext context);
 }

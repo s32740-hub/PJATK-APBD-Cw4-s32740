@@ -70,7 +70,7 @@ public class FromTenToTwentySeatCountDiscount : IDiscountStrategy
     public (decimal discount, string note) Calculate(decimal baseAmount, DiscountContext context)
         => (baseAmount * 0.04m, "small team discount; ");
 }
-public class LoyaltyDiscountRule
+public class LoyaltyDiscountRule : IDiscountStrategy
 {
     public bool IsMatch(DiscountContext context) => context.UseLoyaltyPoints && context.LoyaltyPoints>0;
 

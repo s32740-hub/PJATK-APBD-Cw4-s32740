@@ -17,6 +17,11 @@ public class SupportFeeEnterprisePlan:ISupportFee
     public bool IsMatch(string normalizedPlanCode) => normalizedPlanCode == "ENTERPRISE";
     public decimal Calculate() => 700m;
 }
+public class DefaultSupportPlan:ISupportFee
+{
+    public bool IsMatch(string normalizedPlanCode) => true;
+    public decimal Calculate() => 0m;
+}
 
 public class PaymentFeeCard : IPaymentFee
 {
