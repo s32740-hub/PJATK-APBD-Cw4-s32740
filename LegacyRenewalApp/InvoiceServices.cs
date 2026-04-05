@@ -16,7 +16,7 @@ public record InvoiceRequest(
     decimal supportFee,
     string FullName
     );
-public class CreateRenewalInvoice : IInvoiceFactory
+public class RenewalInvoiceFactory : IInvoiceFactory
 {
     public RenewalInvoice Create(InvoiceRequest request)
     {
