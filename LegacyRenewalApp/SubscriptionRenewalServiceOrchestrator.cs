@@ -2,7 +2,7 @@
 
 namespace LegacyRenewalApp;
 
-public class SubscriptionRenewalServiceFactory:ISubscriptionRenewalOrchestrator
+public class SubscriptionRenewalServiceOrchestrator:ISubscriptionRenewalOrchestrator
 {
     private readonly ICustomerPlanRepository _customerPlanRepository;
     private readonly ISubscriptionPlanRepository _subscriptionPlanRepository;
@@ -16,7 +16,7 @@ public class SubscriptionRenewalServiceFactory:ISubscriptionRenewalOrchestrator
     private readonly IFinalSumCalculator _finalSumCalculator;
     private readonly IRenewalProcessService _renewalProcessService;
 
-    public SubscriptionRenewalServiceFactory(
+    public SubscriptionRenewalServiceOrchestrator(
         ICustomerPlanRepository customerPlanRepository,
         ISubscriptionPlanRepository subscriptionPlanRepository,
         IRenewalValidator renewalValidator,

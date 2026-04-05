@@ -8,7 +8,7 @@ namespace LegacyRenewalApp
         private readonly ISubscriptionRenewalOrchestrator _factory;
         public SubscriptionRenewalService()
         {
-            _factory = new SubscriptionRenewalServiceFactory(
+            _factory = new SubscriptionRenewalServiceOrchestrator(
                 customerPlanRepository: new CustomerPlanRepository(),
                 subscriptionPlanRepository: new SubscriptionPlanRepository(),
                 renewalValidator: new RenewalValidator(),
