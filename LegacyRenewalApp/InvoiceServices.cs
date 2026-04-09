@@ -5,15 +5,15 @@ namespace LegacyRenewalApp;
 public record InvoiceRequest(
     decimal BaseAmount,
     decimal TaxAmount,
-    int customerId,
-    string normalizedPlanCode,
-    string normalizedPaymentMethod,
-    int seatCount,
-    decimal discountAmount,
-    decimal paymentFee,
-    decimal finalAmount,
-    string notes,
-    decimal supportFee,
+    int CustomerId,
+    string NormalizedPlanCode,
+    string NormalizedPaymentMethod,
+    int SeatCount,
+    decimal DiscountAmount,
+    decimal PaymentFee,
+    decimal FinalAmount,
+    string Notes,
+    decimal SupportFee,
     string FullName
     );
 public class RenewalInvoiceFactory : IInvoiceFactory
@@ -24,16 +24,16 @@ public class RenewalInvoiceFactory : IInvoiceFactory
         {
             BaseAmount = Round(request.BaseAmount),
             TaxAmount = Round(request.TaxAmount),
-            InvoiceNumber = GenerateInvoiceNumber(request.customerId, request.normalizedPlanCode),
+            InvoiceNumber = GenerateInvoiceNumber(request.CustomerId, request.NormalizedPlanCode),
             CustomerName = request.FullName,
-            PlanCode = request.normalizedPlanCode,
-            PaymentMethod = request.normalizedPaymentMethod,
-            SeatCount = request.seatCount,
-            DiscountAmount = Round(request.discountAmount),
-            SupportFee = Round(request.supportFee),
-            PaymentFee = Round(request.paymentFee),
-            FinalAmount = Round(request.finalAmount),
-            Notes = request.notes?.Trim() ?? string.Empty,
+            PlanCode = request.NormalizedPlanCode,
+            PaymentMethod = request.NormalizedPaymentMethod,
+            SeatCount = request.SeatCount,
+            DiscountAmount = Round(request.DiscountAmount),
+            SupportFee = Round(request.SupportFee),
+            PaymentFee = Round(request.PaymentFee),
+            FinalAmount = Round(request.FinalAmount),
+            Notes = request.Notes?.Trim() ?? string.Empty,
             GeneratedAt = DateTime.UtcNow
         };
         return invoice;

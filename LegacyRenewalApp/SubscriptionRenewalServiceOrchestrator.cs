@@ -86,15 +86,15 @@ public class SubscriptionRenewalServiceOrchestrator:ISubscriptionRenewalOrchestr
         var invoiceRequest = new InvoiceRequest(
             BaseAmount: baseAmount,
             TaxAmount: taxAmount,
-            customerId: customer.Id,
-            normalizedPlanCode: request.PlanCode,
-            normalizedPaymentMethod: request.PaymentMethod,
-            seatCount: request.SeatCount,
-            discountAmount: discountAmount,
-            paymentFee: paymentFee,
-            finalAmount: finalAmount,
-            notes: notes,
-            supportFee: supportFee,
+            CustomerId: customer.Id,
+            NormalizedPlanCode: request.PlanCode,
+            NormalizedPaymentMethod: request.PaymentMethod,
+            SeatCount: request.SeatCount,
+            DiscountAmount: discountAmount,
+            PaymentFee: paymentFee,
+            FinalAmount: finalAmount,
+            Notes: notes,
+            SupportFee: supportFee,
             FullName: customer.FullName);
 
         return _renewalProcessService.Execute(invoiceRequest, customer.Email);
